@@ -1,5 +1,4 @@
 import sys
-import time
 from io import StringIO
 from threading import Thread
 from shiny import App, render, ui
@@ -19,14 +18,22 @@ class ShinyLogger:
 # Create a ShinyLogger instance
 logger = ShinyLogger()
 
-# Print startup message
-print("Application is starting up...")
+# Function to print environment setup logs
+def print_environment_setup_logs():
+    print("Starting environment setup...")
+    # Simulate environment setup logs
+    for i in range(5):
+        print(f"Setting up environment step {i+1}...")
+    print("Environment setup completed.")
 
-# Sample function to generate logs
-def generate_logs():
-    for i in range(10):
-        print(f"Log entry {i+1}: This is a sample log message.")
-        time.sleep(1)  # Simulate time delay for log generation
+# Function to print variables being loaded
+def print_variables_loading_logs():
+    print("Loading variables...")
+    # Simulate loading variables logs
+    variables = {"var1": 10, "var2": "Hello", "var3": [1, 2, 3]}
+    for key, value in variables.items():
+        print(f"Variable '{key}': {value}")
+    print("Variable loading completed.")
 
 # Define the Shiny UI
 app_ui = ui.page_fluid(
@@ -46,7 +53,8 @@ def server(input, output, session):
     @session.on_input_change("start_logging")
     def on_start_logging():
         if input.start_logging > 0:  # Check if the button is pressed
-            Thread(target=generate_logs).start()
+            Thread(target=print_environment_setup_logs).start()
+            Thread(target=print_variables_loading_logs).start()
             Thread(target=update_logs).start()
 
 app = App(app_ui, server)
