@@ -1,10 +1,11 @@
-import streamlit as st
+from bokeh.io import curdoc
+from bokeh.models import Div
+from threading import Thread
 import sys
 import time
 from io import StringIO
-from threading import Thread
 
-class StreamlitLogger:
+class BokehLogger:
     def __init__(self):
         self.log = StringIO()
         self.original_stdout = sys.stdout
@@ -16,8 +17,8 @@ class StreamlitLogger:
     def reset_stdout(self):
         sys.stdout = self.original_stdout
 
-# Create a StreamlitLogger instance
-logger = StreamlitLogger()
+# Create a BokehLogger instance
+logger = BokehLogger()
 
 # Function to generate logs
 def generate_logs():
@@ -25,17 +26,24 @@ def generate_logs():
         print(f"Log entry {i+1}: This is a sample log message.")
         time.sleep(1)
 
-# Streamlit app layout
-st.title("Real-time Log Viewer")
-st.write("### Logs:")
-log_container = st.empty()  # Placeholder for the log output
+# Define a Bokeh document
+doc = curdoc()
 
-# Button to start generating logs
-if st.button("Start Logging"):
-    Thread(target=generate_logs).start()
+# Create a Div to display logs
+log_div = Div(width=800, height=400)
 
-# Update logs in real-time
-while True:
-    logs = logger.get_logs()
-    log_container.text_area("Log Output", logs, height=300)
-    time.sleep(1)
+# Function to update log Div with real-time logs
+def update_logs():
+    while True:
+        logs = logger.get_logs()
+        log_div.text = logs
+        time.sleep(1)
+
+# Start generating logs in a separate thread
+Thread(target=generate_logs).start()
+
+# Start updating logs in a separate thread
+Thread(target=update_logs).start()
+
+# Add the log Div to the Bokeh document
+doc.add_root(log_div)
