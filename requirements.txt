@@ -1,1 +1,1 @@
-bokeh
+streamlit
