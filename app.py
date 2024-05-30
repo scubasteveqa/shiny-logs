@@ -1,52 +1,43 @@
-from bokeh.io import curdoc
-from bokeh.models import Div
-from threading import Thread
-import time
-from io import StringIO
+import streamlit as st
 import sys
+import time
 
-class BokehLogger:
+# Create a custom stream to capture stdout
+class StdoutCapture:
     def __init__(self):
-        self.log = StringIO()
+        self.buffer = ""
         self.original_stdout = sys.stdout
-        sys.stdout = self.log
 
-    def get_logs(self):
-        return self.log.getvalue()
+    def write(self, message):
+        self.buffer += message
+        if "\n" in message:
+            self.flush()
 
-    def reset_stdout(self):
-        sys.stdout = self.original_stdout
+    def flush(self):
+        self.original_stdout.write(self.buffer)
+        self.original_stdout.flush()
+        self.buffer = ""
 
-# Create a BokehLogger instance
-logger = BokehLogger()
+# Create an instance of the custom stream
+stdout_capture = StdoutCapture()
 
-# Function to print environment setup logs
-def print_environment_setup_logs():
-    print("Starting environment setup...")
-    # Simulate environment setup logs
-    for i in range(5):
-        print(f"Setting up environment step {i+1}...")
-        time.sleep(1)
-    print("Environment setup completed.")
+# Redirect stdout to the custom stream
+sys.stdout = stdout_capture
 
-# Function to update log Div with real-time logs
-def update_logs():
+# Streamlit app layout
+st.title("Real-time Log Viewer")
+st.write("### Logs:")
+
+# Function to continuously display logs
+def display_logs():
     while True:
-        logs = logger.get_logs()
-        log_div.text = logs
-        time.sleep(1)
+        # Get the captured logs
+        logs = stdout_capture.buffer
+        # Display logs in the Streamlit UI
+        st.text(logs)
+        # Clear the buffer to avoid duplication of logs
+        stdout_capture.buffer = ""
+        time.sleep(0.1)  # Adjust sleep time as needed
 
-# Define a Bokeh document
-doc = curdoc()
-
-# Create a Div to display logs
-log_div = Div(width=800, height=400)
-
-# Start printing environment setup logs in a separate thread
-Thread(target=print_environment_setup_logs).start()
-
-# Start updating logs in a separate thread
-Thread(target=update_logs).start()
-
-# Add the log Div to the Bokeh document
-doc.add_root(log_div)
+# Start displaying logs
+display_logs()
