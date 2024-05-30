@@ -1,10 +1,10 @@
-import streamlit as st
+from shiny import App, render, ui
 import sys
 import time
 from io import StringIO
 from threading import Thread
 
-class StreamlitLogger:
+class ShinyLogger:
     def __init__(self):
         self.log = StringIO()
         sys.stdout = self.log
@@ -12,8 +12,8 @@ class StreamlitLogger:
     def get_logs(self):
         return self.log.getvalue()
 
-# Create a StreamlitLogger instance
-logger = StreamlitLogger()
+# Create a ShinyLogger instance
+logger = ShinyLogger()
 
 # Print startup message
 print("Application is starting up...")
@@ -24,22 +24,29 @@ def generate_logs():
         print(f"Log entry {i+1}: This is a sample log message.")
         time.sleep(1)  # Simulate time delay for log generation
 
-# Function to update logs in Streamlit app
-def update_logs():
-    while True:
-        logs = logger.get_logs()
-        log_container.text_area("Log Output", logs, height=300, key="log_output")
-        time.sleep(1)
-        st.experimental_rerun()
+# Define the Shiny UI
+app_ui = ui.page_fluid(
+    ui.h2("Real-time Log Viewer"),
+    ui.output_text_area("log_output", rows=20, cols=80),
+    ui.input_action_button("start_logging", "Start Logging")
+)
 
-# Streamlit app layout
-st.title("Real-time Log Viewer")
-st.write("### Logs:")
-log_container = st.empty()  # Placeholder for the log output
+# Define the Shiny server logic
+def server(input, output, session):
+    def update_logs():
+        while True:
+            logs = logger.get_logs()
+            session.send_input_message("log_output", logs)
+            time.sleep(1)
 
-# Button to start generating logs
-if st.button("Start Logging"):
-    # Start log generation in a separate thread
-    Thread(target=generate_logs).start()
-    # Start log updates in the main thread
-    Thread(target=update_logs).start()
+    @session.on_input_change("start_logging")
+    def on_start_logging():
+        if input.start_logging > 0:  # Check if the button is pressed
+            Thread(target=generate_logs).start()
+            Thread(target=update_logs).start()
+
+app = App(app_ui, server)
+
+# Run the app
+if __name__ == "__main__":
+    app.run()
