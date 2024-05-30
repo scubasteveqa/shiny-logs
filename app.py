@@ -1,16 +1,20 @@
-from shiny import App, render, ui
 import sys
 import time
 from io import StringIO
 from threading import Thread
+from shiny import App, render, ui
 
 class ShinyLogger:
     def __init__(self):
         self.log = StringIO()
+        self.original_stdout = sys.stdout
         sys.stdout = self.log
 
     def get_logs(self):
         return self.log.getvalue()
+
+    def reset_stdout(self):
+        sys.stdout = self.original_stdout
 
 # Create a ShinyLogger instance
 logger = ShinyLogger()
