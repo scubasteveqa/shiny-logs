@@ -2,6 +2,7 @@ import streamlit as st
 import sys
 import time
 from io import StringIO
+from threading import Thread
 
 class StreamlitLogger:
     def __init__(self):
@@ -29,15 +30,14 @@ st.title("Real-time Log Viewer")
 st.write("### Logs:")
 log_container = st.empty()  # Placeholder for the log output
 
-# Button to start generating logs
+# Function to update logs in Streamlit app
+def update_logs():
+    while True:
+        logs = logger.get_logs()
+        log_container.text_area("Log Output", logs, height=300, key="log_output")
+        time.sleep(1)
+
+# Start log generation in a separate thread
 if st.button("Start Logging"):
-    generate_logs()
-
-# Unique key for text_area
-text_area_key = "log_output"
-
-# Continuously update the logs in the Streamlit app
-while True:
-    logs = logger.get_logs()
-    log_container.text_area("Log Output", logs, height=300, key=text_area_key)
-    time.sleep(1)
+    Thread(target=generate_logs).start()
+    Thread(target=update_logs).start()
