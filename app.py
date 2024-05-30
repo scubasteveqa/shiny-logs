@@ -1,9 +1,9 @@
 from bokeh.io import curdoc
 from bokeh.models import Div
 from threading import Thread
-import sys
 import time
 from io import StringIO
+import sys
 
 class BokehLogger:
     def __init__(self):
@@ -20,17 +20,14 @@ class BokehLogger:
 # Create a BokehLogger instance
 logger = BokehLogger()
 
-# Function to generate logs
-def generate_logs():
-    for i in range(10):
-        print(f"Log entry {i+1}: This is a sample log message.")
+# Function to print environment setup logs
+def print_environment_setup_logs():
+    print("Starting environment setup...")
+    # Simulate environment setup logs
+    for i in range(5):
+        print(f"Setting up environment step {i+1}...")
         time.sleep(1)
-
-# Define a Bokeh document
-doc = curdoc()
-
-# Create a Div to display logs
-log_div = Div(width=800, height=400)
+    print("Environment setup completed.")
 
 # Function to update log Div with real-time logs
 def update_logs():
@@ -39,8 +36,14 @@ def update_logs():
         log_div.text = logs
         time.sleep(1)
 
-# Start generating logs in a separate thread
-Thread(target=generate_logs).start()
+# Define a Bokeh document
+doc = curdoc()
+
+# Create a Div to display logs
+log_div = Div(width=800, height=400)
+
+# Start printing environment setup logs in a separate thread
+Thread(target=print_environment_setup_logs).start()
 
 # Start updating logs in a separate thread
 Thread(target=update_logs).start()
