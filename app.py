@@ -2,7 +2,6 @@ import streamlit as st
 import sys
 import time
 
-# Create a custom stream to capture stdout
 class StdoutCapture:
     def __init__(self):
         self.buffer = ""
