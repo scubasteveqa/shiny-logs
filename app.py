@@ -33,8 +33,11 @@ log_container = st.empty()  # Placeholder for the log output
 if st.button("Start Logging"):
     generate_logs()
 
+# Unique key for text_area
+text_area_key = "log_output"
+
 # Continuously update the logs in the Streamlit app
 while True:
     logs = logger.get_logs()
-    log_container.text_area("Log Output", logs, height=300)
+    log_container.text_area("Log Output", logs, height=300, key=text_area_key)
     time.sleep(1)
